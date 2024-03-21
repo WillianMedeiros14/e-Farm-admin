@@ -1,26 +1,23 @@
-import { Navbar } from "@/components/molecules/navbar";
+import { SignIn } from "@/components/organism/sign-in";
 import Image from "next/image";
-
-import { ItemRemedy } from "@/components/atoms/intemRemedy";
-import { ProductsHome } from "@/components/organism/products-home";
 
 export default function Home() {
   return (
-    <main className="flex max-w-screen-2xl mx-auto min-h-screen flex-col p-10">
-      <Navbar />
+    <main className="flex flex-1 w-full items-center justify-center">
+      <div className="flex flex-1 max-w-screen-2xl">
+        <div className="flex w-2/4 justify-end">
+          <Image
+            src={"/assets/InsuranceScreenLogin.svg"}
+            alt={"E-Farms"}
+            width={500}
+            height={500}
+          />
+        </div>
 
-      <div className="w-full self-center mb-8">
-        <Image
-          src={"/assets/bannerPromotion.svg"}
-          alt={"E-Farms"}
-          layout="responsive"
-          width={2000}
-          height={300}
-          objectFit="cover"
-        />
+        <div className="flex flex-1 items-center pl-14">
+          <SignIn />
+        </div>
       </div>
-
-      <ProductsHome />
     </main>
   );
 }

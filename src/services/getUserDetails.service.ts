@@ -1,9 +1,7 @@
 import { db, doc, getDoc } from "@/config/firebase";
 
 export interface IUser {
-  email: string;
-  name: string;
-  phone: string;
+  type: string;
 }
 
 export interface IGetUserDetailsServiceProps {

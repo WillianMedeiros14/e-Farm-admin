@@ -34,7 +34,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     authChannel.onmessage = (message) => {
       switch (message.data) {
         case "signIn":
-          window.location.href = "/";
+          window.location.href = "/products";
 
           break;
         case "signOut":
@@ -61,28 +61,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         userId: userId,
       });
 
-      queryClient.setQueriesData(
-        { queryKey: ["keyUserDetails", userId] },
-        () => {
-          return {
-            ...dataUser,
-          };
-        }
-      );
+      if (dataUser?.type === "admin") {
+        setCookie(undefined, "userId", userId, {
+          maxAge: 60 * 60 * 24 * 30, // 30 days
+          path: "/",
+        });
 
-      setCookie(undefined, "userId", userId, {
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-        path: "/",
-      });
+        authChannel.postMessage("signIn");
 
-      authChannel.postMessage("signIn");
+        window.location.href = "/products";
 
-      window.location.href = "/";
-
-      toast({
-        description: "Sign-in realizado com sucesso.",
-        className: "bg-green-600 text-white",
-      });
+        toast({
+          description: "Sign-in realizado com sucesso.",
+          className: "bg-green-600 text-white",
+        });
+      } else {
+        toast({
+          description: "Credenciais inválidas!",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         description: "Credenciais inválidas!",
