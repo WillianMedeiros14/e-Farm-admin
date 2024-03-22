@@ -62,19 +62,36 @@ export default async function Page({ params }: { params: { slug: string } }) {
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-semibold">
               Produto
-              <span className="font-normal"> Nome do produto</span>
+              <span className="font-normal"> {data?.name}</span>
             </h1>
           </div>
 
-          <div className="flex justify-end w-full gap-4">
-            <div className="flex items-center gap-4">
-              <ModalEditProduct id={params.slug} />
-            </div>
+          {data && (
+            <div className="flex justify-end w-full gap-4">
+              <div className="flex items-center gap-4">
+                <ModalEditProduct
+                  id={params.slug}
+                  dataProduct={{
+                    amount: String(data?.amount),
+                    category: String(data?.category),
+                    description: String(data?.description),
+                    expirationDate: data?.expirationDate,
+                    image: data?.image,
+                    manufacturer: String(data?.manufacturer),
+                    name: data?.name,
+                    pharmaceuticalForm: String(data?.pharmaceuticalForm),
+                    presentation: String(data?.presentation),
+                    price: String(data?.price),
+                    quantityInStock: String(data?.quantityInStock),
+                  }}
+                />
+              </div>
 
-            <div className="flex items-center gap-2">
-              <DeleteProduct id={params.slug} />
+              <div className="flex items-center gap-2">
+                <DeleteProduct id={params.slug} />
+              </div>
             </div>
-          </div>
+          )}
 
           {data && (
             <div>

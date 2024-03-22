@@ -66,6 +66,9 @@ interface ModalNewProductProps {
 export function ModalNewProduct({ refetchApi }: ModalNewProductProps) {
   const { toast } = useToast();
 
+  const [open, setOpen] = React.useState(false);
+  const [image, setImage] = useState<File | null>(null);
+
   const form = useForm<TypeFormNewProduct>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,9 +85,6 @@ export function ModalNewProduct({ refetchApi }: ModalNewProductProps) {
       quantityInStock: "",
     },
   });
-
-  const [open, setOpen] = React.useState(false);
-  const [image, setImage] = useState<File | null>(null);
 
   const handleClose = () => {
     setOpen(false);
@@ -123,7 +123,6 @@ export function ModalNewProduct({ refetchApi }: ModalNewProductProps) {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ values });
     mutate(values);
   }
 
@@ -226,7 +225,8 @@ export function ModalNewProduct({ refetchApi }: ModalNewProductProps) {
 
                     <Button
                       className="text-black bg-amber-500 text-xs font-semibold hover:bg-amber-500"
-                      onClick={changeImage}
+                      type="button"
+                      onClick={() => changeImage()}
                     >
                       Editar
                     </Button>
