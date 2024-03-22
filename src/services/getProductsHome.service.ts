@@ -21,16 +21,27 @@ export interface IProducts {
 }
 
 export interface IGetProductsHomeServiceProps {
-  category: string;
+  search: string;
 }
 
 export async function getProductsHomeService({
-  category,
+  search,
 }: IGetProductsHomeServiceProps): Promise<IProducts[] | null> {
   try {
     const docRef = collection(db, "products");
-    const queryObject = query(docRef, where("category", "==", `${category}`));
-    const queryRef = category === "Todas" ? docRef : queryObject;
+    let queryRef;
+
+    if (search.length === 0) {
+      queryRef = docRef;
+    } else {
+      const startAt = search;
+      const endAt = search + "\uf8ff";
+      queryRef = query(
+        docRef,
+        where("name", ">=", startAt),
+        where("name", "<=", endAt)
+      );
+    }
 
     const docSnap = await getDocs(queryRef);
 
@@ -38,17 +49,11 @@ export async function getProductsHomeService({
 
     docSnap.forEach((doc) => {
       const data = doc.data() as IProducts;
-
-      const newValues = [...value];
-
       const newValue = {
         ...data,
         id: doc.id,
       };
-
-      newValues.push(newValue);
-
-      value = newValues;
+      value.push(newValue);
     });
 
     if (value.length > 0) {

@@ -5,9 +5,9 @@ import {
 
 import { useQuery } from "@tanstack/react-query";
 
-export function useGetProductsHome({ category }: IGetProductsHomeServiceProps) {
+export function useGetProductsHome({ search }: IGetProductsHomeServiceProps) {
   return useQuery({
-    queryKey: ["keyProductsHome", category],
-    queryFn: () => getProductsHomeService({ category }),
+    queryKey: ["keyProductsHome", search],
+    queryFn: () => getProductsHomeService({ search }),
   });
 }
