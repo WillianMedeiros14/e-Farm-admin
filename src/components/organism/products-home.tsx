@@ -1,19 +1,10 @@
 "use client";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ItemRemedy } from "../atoms/intemRemedy";
+
 import { useState } from "react";
 import { useGetProductsHome } from "@/hooks/useGetProductsHome";
 
 import { Loader2 } from "lucide-react";
-import { useCar } from "@/hooks/useCar";
+
 import { ModalNewProduct } from "./modal-new-product";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
