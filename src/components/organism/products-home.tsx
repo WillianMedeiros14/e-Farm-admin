@@ -9,6 +9,8 @@ import { ModalNewProduct } from "./modal-new-product";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { queryClient } from "@/app/providers";
+import { ModalEditProduct } from "./modal-edit-product";
+import Link from "next/link";
 
 export function ProductsHome() {
   const [search, setSearch] = useState("");
@@ -19,12 +21,19 @@ export function ProductsHome() {
     search,
   });
 
-  function refetchApi() {
+  function refetchApi(isEdit: boolean) {
     setSearch("");
     setInput("");
-    queryClient.invalidateQueries({
-      queryKey: ["keyProductsHome", ""],
-    });
+
+    if (isEdit) {
+      queryClient.invalidateQueries({
+        queryKey: ["keyProductsHome", search],
+      });
+    } else {
+      queryClient.invalidateQueries({
+        queryKey: ["keyProductsHome", ""],
+      });
+    }
   }
 
   return (
@@ -51,7 +60,7 @@ export function ProductsHome() {
           </div>
         </div>
 
-        <ModalNewProduct refetchApi={refetchApi} />
+        <ModalNewProduct refetchApi={() => refetchApi(true)} />
       </div>
 
       {isLoading && (
@@ -99,13 +108,16 @@ export function ProductsHome() {
                     >
                       {item.id}
                     </th>
-                    <td className="flex flex-1 font-normal text-base flex items-center">
+                    <td className="flex flex-1 font-normal text-base items-center">
                       {item.name}
                     </td>
                     <td>
-                      <Button className="text-black bg-amber-500 text-xs font-semibold hover:bg-amber-500">
-                        Editar
-                      </Button>
+                      <Link
+                        href={`/products/${item.id}`}
+                        className="w-17 text-white bg-sky-400 text-xs font-semibold hover:bg-sky-400 p-3 rounded-sm "
+                      >
+                        Visualizar
+                      </Link>
                     </td>
                   </tr>
                 </tbody>
