@@ -1,9 +1,7 @@
 "use client";
 import {
   AlertDialog,
-  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -15,84 +13,99 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { InputComponent } from "../atoms/input-comnponent";
 
 import { Form, FormField } from "../ui/form";
 import { useToast } from "../ui/use-toast";
-import { ItemCar } from "../atoms/itemCar";
 import { InputSelect } from "../atoms/input-select";
-import Image from "next/image";
-import { useCar } from "@/hooks/useCar";
-import {
-  IFinalizePurchaseServiceProps,
-  finalizePurchaseService,
-} from "@/services/finalizePurchase.service";
-import { parseCookies } from "nookies";
-import { queryClient } from "@/app/providers";
+import { newProductService } from "@/services/newProduct.service";
 
 const formSchema = z.object({
-  paymentMethod: z.string().min(1, {
-    message: "Selecione um método de pagamento",
+  name: z.string().min(1, {
+    message: "Digite um nome",
   }),
-  street: z.string().min(1, {
-    message: "Digite o seu logradouro",
+  category: z.string().min(1, {
+    message: "Selecione uma categoria",
   }),
-  number: z.string().min(1, {
-    message: "Digite o número de seu endereço",
+  description: z.string().min(1, {
+    message: "Digite uma descrição",
   }),
-  neighborhood: z.string().min(1, {
-    message: "Digite o seu bairro",
+  expirationDate: z.string().min(1, {
+    message: "Informe a data de validade",
   }),
-  complement: z.string().min(1, {
-    message: "Digite um ponto de referência",
+  image: z.string().min(1, {
+    message: "Selecione uma imagem",
+  }),
+  amount: z.string().min(1, {
+    message: "Informe a quantidade",
+  }),
+  manufacturer: z.string().min(1, {
+    message: "Informe o fabricante",
+  }),
+  pharmaceuticalForm: z.string().min(1, {
+    message: "Infome a forma farmaceutica",
+  }),
+  presentation: z.string().min(1, {
+    message: "Informe a apresentação",
+  }),
+  price: z.string().min(1, {
+    message: "Informe o preço do produto",
+  }),
+  quantityInStock: z.string().min(1, {
+    message: "Informe a quantidade em estoque",
   }),
 });
 
-export type TypeFormCar = z.infer<typeof formSchema>;
+export type TypeFormNewProduct = z.infer<typeof formSchema>;
 
-export function ModalNewProduct() {
+interface ModalNewProductProps {
+  refetchApi: () => void;
+}
+
+export function ModalNewProduct({ refetchApi }: ModalNewProductProps) {
   const { toast } = useToast();
-  const { userId } = parseCookies();
 
-  const {
-    itemsCar,
-    removeItemCar,
-    handleIncreaseItemQuantity,
-    handleDecreaseItemQuantity,
-    handleClean,
-    filter,
-  } = useCar();
-
-  const form = useForm<TypeFormCar>({
+  const form = useForm<TypeFormNewProduct>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      paymentMethod: "",
-      street: "",
-      number: "",
-      neighborhood: "",
+      name: "",
+      category: "",
+      description: "",
+      expirationDate: "",
+      image: "",
+      manufacturer: "",
+      pharmaceuticalForm: "",
+      presentation: "",
+      amount: "",
+      price: "",
+      quantityInStock: "",
     },
   });
 
   const [open, setOpen] = React.useState(false);
+  const [image, setImage] = useState<File | null>(null);
 
   const handleClose = () => {
     setOpen(false);
   };
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (values: IFinalizePurchaseServiceProps) => {
-      return finalizePurchaseService(values);
+    mutationFn: async (values: TypeFormNewProduct) => {
+      return newProductService({ data: values, imageSelected: image });
     },
     onSuccess: () => {
       form.reset();
       handleClose();
-      handleClean();
 
-      queryClient.cancelQueries({ queryKey: ["keyProductsHome", filter] });
+      setTimeout(() => {
+        setImage(null);
+      }, 500);
+
+      refetchApi();
 
       toast({
-        description: "Compra finalizada com sucesso!",
+        description: "Cadastro realizado com sucesso!",
         className: "bg-green-600 text-white",
       });
     },
@@ -103,7 +116,7 @@ export function ModalNewProduct() {
       console.log({ data });
 
       toast({
-        description: "Erro ao finalizar compra",
+        description: "Erro ao cadastr produto",
         variant: "destructive",
       });
     },
@@ -111,45 +124,30 @@ export function ModalNewProduct() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log({ values });
-    let priceTotal = 0;
+    mutate(values);
+  }
 
-    itemsCar.forEach((item) => {
-      const value = item.price * item.quantityInCart;
-      priceTotal = priceTotal + value;
-    });
+  const handleChange = (e: any) => {
+    const selectedImage = e.target.files[0];
+    if (selectedImage && selectedImage.type.includes("image")) {
+      setImage(selectedImage);
+      setTimeout(() => {
+        form.setValue("image", selectedImage.name);
+      }, 500);
+    } else {
+      toast({
+        description: "Por favor, selecione um arquivo de imagem válido.",
+        variant: "destructive",
+      });
+    }
+  };
 
-    const products = itemsCar.map((item) => {
-      return {
-        category: item.category,
-        description: item.description,
-        expirationDate: item.expirationDate,
-        id: item.id,
-        image: item.image,
-        manufacturer: item.manufacturer,
-        name: item.name,
-        pharmaceuticalForm: item.pharmaceuticalForm,
-        presentation: item.presentation,
-        price: item.price,
-        totalItems: item.quantityInCart,
-      };
-    });
+  function changeImage() {
+    form.reset({ image: undefined });
 
-    const valuesSend: IFinalizePurchaseServiceProps = {
-      data: {
-        priceTotal,
-        userId,
-        purchaseDate: new Date(),
-        products,
-        complement: values.complement,
-        neighborhood: values.neighborhood,
-        number: values.number,
-        street: values.street,
-        paymentMethod: values.paymentMethod,
-      },
-    };
-
-    // console.log({ valuesSend });
-    mutate(valuesSend);
+    setTimeout(() => {
+      setImage(null);
+    }, 500);
   }
 
   return (
@@ -165,11 +163,11 @@ export function ModalNewProduct() {
           Adicionar
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-h-screen overflow-auto">
         <AlertDialogHeader>
           <div className="flex flex-row items-center justify-between">
             <AlertDialogTitle className="font-semibold flex text-center text-2xl justify-center items-center">
-              Produtos
+              Novo produtos
             </AlertDialogTitle>
             <Button
               variant={"outline"}
@@ -184,57 +182,66 @@ export function ModalNewProduct() {
         </AlertDialogHeader>
 
         <div className="w-full">
-          {itemsCar.map((item) => (
-            <ItemCar
-              key={item.id}
-              data={item}
-              onRemove={() => removeItemCar(item.id)}
-              handleDecreaseItemQuantity={() =>
-                handleDecreaseItemQuantity(item.id)
-              }
-              handleIncreaseItemQuantity={() =>
-                handleIncreaseItemQuantity(item.id)
-              }
-            />
-          ))}
-
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="mt-6 w-full space-y-4"
+              className="mt-4 w-full space-y-4"
             >
+              <span className="font-semibold">Informações do produto</span>
               <div className="mb-8">
-                <FormField
-                  control={form.control}
-                  name="paymentMethod"
-                  render={({ field }) => (
-                    <InputSelect
-                      title="Método de pagamento"
-                      placeholder="Selecione um método"
-                      data={[
-                        { id: "Pix", name: "Pix" },
-                        { id: "Cartão de débito", name: "Cartão de débito" },
-                        { id: "Cartão de crédito", name: "crédito" },
-                      ]}
-                      field={{ ...field }}
-                      placeholderSearch="Pesquise uma ocorrência"
-                      placeholderSearchNotFound="Ocorrência não encontrada"
-                    />
-                  )}
-                />
+                {image === null ? (
+                  <FormField
+                    control={form.control}
+                    name="image"
+                    render={({ field }) => (
+                      <InputComponent
+                        title="Foto"
+                        placeholder="Arraste e solte ou insira sua foto aqui"
+                        isLoading={isPending}
+                        field={{ ...field }}
+                        onChange={handleChange}
+                        accept="image/*"
+                        type="file"
+                      />
+                    )}
+                  />
+                ) : (
+                  <div className="flex justify-between items-end gap-4">
+                    <div className="w-[100%]">
+                      <FormField
+                        control={form.control}
+                        name="image"
+                        render={({ field }) => (
+                          <InputComponent
+                            title="Foto"
+                            placeholder="Arraste e solte ou insira sua foto aqui"
+                            isLoading={isPending}
+                            field={{ ...field }}
+                            onChange={handleChange}
+                            disabled={true}
+                          />
+                        )}
+                      />
+                    </div>
+
+                    <Button
+                      className="text-black bg-amber-500 text-xs font-semibold hover:bg-amber-500"
+                      onClick={changeImage}
+                    >
+                      Editar
+                    </Button>
+                  </div>
+                )}
               </div>
-
-              <span className="font-semibold">Endereço</span>
-
               <div className="flex justify-between">
                 <div className="w-[62%] gap-4">
                   <FormField
                     control={form.control}
-                    name="street"
+                    name="name"
                     render={({ field }) => (
                       <InputComponent
-                        title="Logradouro"
-                        placeholder="Informe sua (ex.: Av, Beco, Rua, etc…)"
+                        title="Produto"
+                        placeholder="Nome do produto"
                         isLoading={isPending}
                         field={{ ...field }}
                       />
@@ -245,11 +252,53 @@ export function ModalNewProduct() {
                 <div className="w-[35%]">
                   <FormField
                     control={form.control}
-                    name="number"
+                    name="price"
                     render={({ field }) => (
                       <InputComponent
-                        title="Número"
-                        placeholder="Número de residência"
+                        title="Valor"
+                        placeholder="Informe o valor"
+                        isLoading={isPending}
+                        field={{ ...field }}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="w-[62%] gap-4">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <InputSelect
+                        title="Categoria"
+                        placeholder="Selecione uma categoria"
+                        data={[
+                          { id: "Todas", name: "Todas" },
+                          {
+                            id: " Anti-inflamatório",
+                            name: " Anti-inflamatório",
+                          },
+                          { id: "Alergias", name: "Alergias" },
+                          { id: "Dores", name: "Dores" },
+                          { id: "Gripe", name: "Gripe" },
+                        ]}
+                        field={{ ...field }}
+                        placeholderSearch="Pesquise uma ocorrência"
+                        placeholderSearchNotFound="Ocorrência não encontrada"
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="w-[35%]">
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <InputComponent
+                        title="Quantidade"
+                        placeholder="Informe a qtd."
                         isLoading={isPending}
                         field={{ ...field }}
                       />
@@ -258,39 +307,109 @@ export function ModalNewProduct() {
                 </div>
               </div>
 
+              <div className="flex justify-between ">
+                <div className="w-[48.5%] gap-4">
+                  <FormField
+                    control={form.control}
+                    name="manufacturer"
+                    render={({ field }) => (
+                      <InputComponent
+                        title="Fabricante"
+                        placeholder="Informe o fabricante"
+                        isLoading={isPending}
+                        field={{ ...field }}
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="w-[48.5%]">
+                  <FormField
+                    control={form.control}
+                    name="pharmaceuticalForm"
+                    render={({ field }) => (
+                      <InputComponent
+                        title="Forma farmaceutica"
+                        placeholder="Informe a farmaceutica"
+                        isLoading={isPending}
+                        field={{ ...field }}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between ">
+                <div className="w-[48.5%]">
+                  <FormField
+                    control={form.control}
+                    name="presentation"
+                    render={({ field }) => (
+                      <InputComponent
+                        title="Apresentação"
+                        placeholder="Informe a apresentação"
+                        isLoading={isPending}
+                        field={{ ...field }}
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="w-[48.5%] gap-4">
+                  <FormField
+                    control={form.control}
+                    name="expirationDate"
+                    render={({ field }) => (
+                      <InputComponent
+                        title="Data de validade"
+                        placeholder="Informe o a data de validade"
+                        isLoading={isPending}
+                        field={{ ...field }}
+                        type="date"
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
               <FormField
                 control={form.control}
-                name="neighborhood"
+                name="description"
                 render={({ field }) => (
                   <InputComponent
-                    title="Bairro"
-                    placeholder="Digite o seu bairro"
+                    title="Descrição"
+                    placeholder="Digite a descrição do remédio"
                     isLoading={isPending}
                     field={{ ...field }}
                   />
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="complement"
-                render={({ field }) => (
-                  <InputComponent
-                    title="Complemento"
-                    placeholder="Informe um ponto de referência"
-                    isLoading={isPending}
-                    field={{ ...field }}
-                  />
-                )}
-              />
+              <div className="mt-8">
+                <span className="font-semibold ">Informações de estoque</span>
+              </div>
 
+              <div className="w-[35%]">
+                <FormField
+                  control={form.control}
+                  name="quantityInStock"
+                  render={({ field }) => (
+                    <InputComponent
+                      title="Quantidade em estoque"
+                      placeholder="Informe a qtd. em estoque"
+                      isLoading={isPending}
+                      field={{ ...field }}
+                    />
+                  )}
+                />
+              </div>
               <Button
                 disabled={false}
                 type="submit"
-                className="w-full bg-primary-main"
+                className="w-full bg-green-400 text-black hover:bg-green-400"
               >
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Finalizar pedido
+                Salvar
               </Button>
             </form>
           </Form>

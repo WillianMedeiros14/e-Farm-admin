@@ -1,6 +1,5 @@
 import Image from "next/image";
 
-import { ModalCar } from "../organism/modal-car";
 import { isLoginSSR } from "@/functions/isLoginSSR";
 import { DialogSignOut } from "./dialogSignOut";
 
@@ -19,8 +18,6 @@ export function Navbar() {
       <div className="flex">
         {isLoginSSR() && (
           <div className="flex gap-3">
-            <ModalCar />
-
             <DialogSignOut
               label={"Sair"}
               title={"Confirmar saída"}

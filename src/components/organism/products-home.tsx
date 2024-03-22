@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { ModalNewProduct } from "./modal-new-product";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { queryClient } from "@/app/providers";
 
 export function ProductsHome() {
   const [search, setSearch] = useState("");
@@ -17,6 +18,14 @@ export function ProductsHome() {
   const { data, isLoading } = useGetProductsHome({
     search,
   });
+
+  function refetchApi() {
+    setSearch("");
+    setInput("");
+    queryClient.invalidateQueries({
+      queryKey: ["keyProductsHome", ""],
+    });
+  }
 
   return (
     <view className="flex flex-1 w-full flex-col">
@@ -42,7 +51,7 @@ export function ProductsHome() {
           </div>
         </div>
 
-        <ModalNewProduct />
+        <ModalNewProduct refetchApi={refetchApi} />
       </div>
 
       {isLoading && (

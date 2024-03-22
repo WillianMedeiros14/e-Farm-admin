@@ -38,7 +38,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           break;
         case "signOut":
-          destroyCookie(undefined, "userId", { path: "/" });
+          destroyCookie(undefined, "user", { path: "/" });
           window.location.href = "/";
           replace("/");
           break;
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       if (dataUser?.type === "admin") {
-        setCookie(undefined, "userId", userId, {
+        setCookie(undefined, "user", userId, {
           maxAge: 60 * 60 * 24 * 30, // 30 days
           path: "/",
         });
