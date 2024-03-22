@@ -19,8 +19,7 @@ import { InputComponent } from "../atoms/input-comnponent";
 import { Form, FormField } from "../ui/form";
 import { useToast } from "../ui/use-toast";
 import { InputSelect } from "../atoms/input-select";
-import { newProductService } from "@/services/newProduct.service";
-import { IProducts } from "@/services/getProductsHome.service";
+
 import Image from "next/image";
 import { doc, updateDoc } from "@firebase/firestore";
 import {
