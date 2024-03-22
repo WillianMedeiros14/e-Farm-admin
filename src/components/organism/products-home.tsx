@@ -51,6 +51,12 @@ export function ProductsHome() {
         </div>
       )}
 
+      {data && data.length === 0 && (
+        <div className="flex flex-wrap mx-auto pt-10 justify-center">
+          Produto não encontrado
+        </div>
+      )}
+
       {data && data?.length > 0 && (
         <table className="flex w-full flex-col border rounded-xl p-8">
           <thead className="w-full">
@@ -99,31 +105,6 @@ export function ProductsHome() {
           )}
         </table>
       )}
-      {/* <div className="flex flex-wrap mx-auto gap-8 justify-center">
-        {isLoading ? (
-          <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-        ) : (
-          <>
-            {data && data?.length > 0 ? (
-              <>
-                {data?.map((item) => (
-                  <ItemRemedy
-                    key={item.id}
-                    data={item}
-                    onSelect={() => addItemCar(item)}
-                  />
-                ))}
-              </>
-            ) : (
-              <>
-                <span className="text-center text-1xl font-bold">
-                  Não há produtos nesta categoria
-                </span>
-              </>
-            )}
-          </>
-        )}
-      </div> */}
     </view>
   );
 }

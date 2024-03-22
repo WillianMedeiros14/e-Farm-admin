@@ -56,10 +56,14 @@ export async function getProductsHomeService({
       value.push(newValue);
     });
 
+    if (docSnap.empty) {
+      return [];
+    }
+
     if (value.length > 0) {
       return value;
     } else {
-      return null;
+      return [];
     }
   } catch (error) {
     console.log({ error });
