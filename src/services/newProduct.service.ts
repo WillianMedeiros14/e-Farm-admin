@@ -29,7 +29,7 @@ export async function newProductService({
         ...data,
         createdAt: new Date(),
         image: imageUrl,
-        price: parseFloat(data.price),
+        price: data.price,
         quantityInStock: parseFloat(data.quantityInStock),
       };
 
