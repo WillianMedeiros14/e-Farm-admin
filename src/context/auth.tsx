@@ -2,10 +2,7 @@
 import { queryClient } from "@/app/providers";
 import { TypeSignIn } from "@/components/organism/modal-login";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  IUser,
-  getUserDetailsService,
-} from "@/services/getUserDetails.service";
+import { getUserDetailsService } from "@/services/getUserDetails.service";
 import { signInService } from "@/services/signIn.service";
 
 import { useRouter } from "next/navigation";
