@@ -94,8 +94,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     destroyCookie(undefined, "user", { path: "/" });
-
     replace("/");
+    window.location.href = "/";
     authChannel.postMessage("signOut");
   }
 
