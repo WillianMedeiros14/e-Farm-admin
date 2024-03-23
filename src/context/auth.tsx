@@ -96,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       className: "bg-green-600 text-white",
     });
 
-    destroyCookie(undefined, "userId", { path: "/" });
+    destroyCookie(undefined, "user", { path: "/" });
 
     replace("/");
     authChannel.postMessage("signOut");
