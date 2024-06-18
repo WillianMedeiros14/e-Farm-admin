@@ -10,7 +10,8 @@ Este projeto serve apenas para demostrar um exemplo de um sistema de cadastro de
 
 ## ⓘ Informações
 
-Está aplicação é a parte de Admin, para ter acesso a parte de Cliente, acesse esse link: [E-Farma Cliente](https://github.com/WillianMedeiros14/e-Farma). <br><br>
+Está aplicação é a parte de Admin, para ter acesso a parte de Cliente, acesse esse link: [E-Farma Cliente](https://github.com/WillianMedeiros14/e-Farma).
+<br><br>
 
 ## 💡 Design
 
